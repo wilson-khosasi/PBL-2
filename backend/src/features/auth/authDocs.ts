@@ -86,4 +86,27 @@ export const registerAuthDocs = (registry: OpenAPIRegistry) => {
          401: { description: 'The email address or password is invalid.' },
       },
    });
+
+   registry.registerPath({
+      method: 'get',
+      path: '/api/auth/me',
+      tags: ['Authentication'],
+      summary: 'Get the currently authenticated user',
+      security: [{ BearerAuth: [] }],
+      responses: {
+         200: {
+            description: 'The authenticated user was retrieved successfully.',
+            content: {
+               'application/json': {
+                  schema: z.object({
+                     msg: z.literal('Authenticated user retrieved successfully'),
+                     data: z.object({ user: PublicUser }),
+                  }),
+               },
+            },
+         },
+         401: { description: 'The authentication token is missing, invalid, or expired.' },
+         404: { description: 'The authenticated user no longer exists.' },
+      },
+   });
 };

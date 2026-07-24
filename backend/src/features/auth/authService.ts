@@ -66,6 +66,41 @@ class AuthService {
 
       return { token, user: toPublicUser(user) };
    }
+
+   async getCurrentUser(id: string): Promise<PublicUser> {
+      const user = await authRepository.findById(id);
+
+      if (!user) {
+         throw new AppError('User not found', 404);
+      }
+
+      return toPublicUser(user);
+   }
 }
 
 export const authService = new AuthService();
+
+// Current branch: `feature/auth`  
+// Latest commit: `cb2f29d`  
+// Git working tree: clean — no staged, unstaged, or untracked Git-visible files.
+
+// Current implementation state:
+
+// - Phase 1 complete: backend dependencies, Prisma Client, local PostgreSQL connection, and migrations verified.
+// - Phase 2 complete: `User` now has `fullName`, `updatedAt`, and `USER`/`ADMIN` roles; three migrations are applied.
+// - Phase 3 complete: Authentication feature foundation, schemas, repository, safe user mapping, route namespace, and OpenAPI security component.
+// - Phase 4 complete: `POST /api/auth/register` with Zod validation, duplicate-email protection, and bcrypt hashing.
+// - Phase 5 complete: `POST /api/auth/login` with bcrypt comparison and signed JWT generation.
+// - OpenAPI/Scalar documents health, register, and login endpoints.
+// - Backend lint, production build, Prisma validation, and migration status all passed.
+// - Phase 6 is not implemented yet: no JWT middleware and no `GET /api/auth/me`.
+// - Frontend authentication is not implemented yet.
+// - Existing registration endpoints still use temporary client-provided user IDs and will need JWT integration later.
+
+// Uncommitted files:
+
+// - None tracked by Git.
+
+// Intentionally local, Git-ignored file:
+
+// - `backend/.env` — contains local database/JWT configuration and must not be committed.

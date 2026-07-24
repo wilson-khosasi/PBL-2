@@ -37,3 +37,24 @@ export const login = async (
       next(err);
    }
 };
+
+export const getCurrentUser = async (
+   req: Request,
+   res: Response,
+   next: NextFunction,
+) => {
+   try {
+      if (!req.user) {
+         throw new Error('Authenticated user is missing from the request');
+      }
+
+      const user = await authService.getCurrentUser(req.user.id);
+
+      res.status(200).json({
+         msg: 'Authenticated user retrieved successfully',
+         data: { user },
+      });
+   } catch (err) {
+      next(err);
+   }
+};
