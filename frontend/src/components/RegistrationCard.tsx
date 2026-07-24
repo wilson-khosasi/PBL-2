@@ -17,7 +17,15 @@ export function RegistrationCard({ registration, onCancel, isCancelling }: Regis
 
   return (
     <div className="border border-yellow-400 rounded-xl p-4 flex gap-4 items-center">
-      <div className="w-24 h-24 bg-gray-100 rounded-lg flex-shrink-0" />
+      {event.imageUrl ? (
+        <img
+          src={event.imageUrl}
+          alt={event.title}
+          className="w-24 h-24 rounded-lg object-cover flex-shrink-0"
+        />
+      ) : (
+        <div className="w-24 h-24 bg-gray-100 rounded-lg flex-shrink-0" />
+      )}
 
       <div className="flex-1">
         <h3 className="font-semibold text-lg text-gray-900">{event.title}</h3>

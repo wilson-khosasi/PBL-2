@@ -25,6 +25,7 @@ model Event {
   date        DateTime
   location    String
   capacity    Int
+  imageUrl    String?
   createdAt   DateTime @default(now())
 
   registrations Registration[]

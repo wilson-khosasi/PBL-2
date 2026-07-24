@@ -5,6 +5,7 @@ export interface Event {
   date: string;
   location: string;
   capacity: number;
+  imageUrl?: string;
 }
 
 export interface Registration {
