@@ -6,3 +6,8 @@ export type RegisterInput = z.infer<typeof RegisterSchema>;
 export type LoginInput = z.infer<typeof LoginSchema>;
 
 export type PublicUser = Pick<User, 'id' | 'fullName' | 'email' | 'role'>;
+
+export interface LoginResult {
+   token: string;
+   user: PublicUser;
+}

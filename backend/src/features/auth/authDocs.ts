@@ -1,6 +1,6 @@
 import type { OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
 import { z } from 'zod';
-import { RegisterSchema } from './authSchema.js';
+import { LoginSchema, RegisterSchema } from './authSchema.js';
 
 export const registerAuthDocs = (registry: OpenAPIRegistry) => {
    registry.registerComponent('securitySchemes', 'BearerAuth', {
@@ -11,6 +11,7 @@ export const registerAuthDocs = (registry: OpenAPIRegistry) => {
    });
 
    const RegisterRequest = registry.register('RegisterRequest', RegisterSchema);
+   const LoginRequest = registry.register('LoginRequest', LoginSchema);
    const PublicUser = registry.register(
       'PublicUser',
       z.object({
@@ -49,6 +50,40 @@ export const registerAuthDocs = (registry: OpenAPIRegistry) => {
          },
          400: { description: 'The request body failed validation.' },
          409: { description: 'The email address is already registered.' },
+      },
+   });
+
+   registry.registerPath({
+      method: 'post',
+      path: '/api/auth/login',
+      tags: ['Authentication'],
+      summary: 'Authenticate a user and receive a JSON Web Token',
+      request: {
+         body: {
+            content: {
+               'application/json': {
+                  schema: LoginRequest,
+               },
+            },
+         },
+      },
+      responses: {
+         200: {
+            description: 'Authentication succeeded.',
+            content: {
+               'application/json': {
+                  schema: z.object({
+                     msg: z.literal('Login successful'),
+                     data: z.object({
+                        token: z.string(),
+                        user: PublicUser,
+                     }),
+                  }),
+               },
+            },
+         },
+         400: { description: 'The request body failed validation.' },
+         401: { description: 'The email address or password is invalid.' },
       },
    });
 };

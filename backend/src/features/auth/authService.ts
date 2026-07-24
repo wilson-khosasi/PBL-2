@@ -1,9 +1,9 @@
 import bcrypt from 'bcrypt';
+import jwt, { type SignOptions } from 'jsonwebtoken';
 import type { User } from '@prisma/client';
 import { AppError } from '@/utils/appError.js';
 import { authRepository } from './authRepository.js';
-import type { PublicUser } from './authTypes.js';
-import type { RegisterInput } from './authTypes.js';
+import type { LoginInput, LoginResult, PublicUser, RegisterInput } from './authTypes.js';
 
 // Keep password fields out of every API response by mapping database users to
 // this deliberately limited public shape.
@@ -31,6 +31,40 @@ class AuthService {
       });
 
       return toPublicUser(user);
+   }
+
+   async login(input: LoginInput): Promise<LoginResult> {
+      const email = input.email.toLowerCase();
+      const user = await authRepository.findByEmail(email);
+
+      if (!user) {
+         throw new AppError('Invalid email or password', 401);
+      }
+
+      const isPasswordValid = await bcrypt.compare(input.password, user.password);
+
+      if (!isPasswordValid) {
+         throw new AppError('Invalid email or password', 401);
+      }
+
+      const secret = process.env.JWT_SECRET;
+
+      if (!secret) {
+         throw new Error('JWT_SECRET is not configured');
+      }
+
+      const expiresIn = (process.env.JWT_EXPIRES_IN ?? '1d') as SignOptions['expiresIn'];
+      const token = jwt.sign(
+         {
+            sub: user.id,
+            email: user.email,
+            role: user.role,
+         },
+         secret,
+         { expiresIn },
+      );
+
+      return { token, user: toPublicUser(user) };
    }
 }
 
