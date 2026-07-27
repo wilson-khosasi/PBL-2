@@ -13,10 +13,16 @@ export const authApi: {
       body: JSON.stringify(payload),
     });
 
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      const text = await res.text();
+      throw new Error(`Server returned non-JSON response (${res.status}): ${text.slice(0,200)}`);
+    }
+
     const json = await res.json();
 
     if (!res.ok) {
-      throw new Error(json.msg || 'Failed to register');
+      throw new Error(json?.msg || `Failed to register (${res.status})`);
     }
 
     return json.data;
@@ -29,10 +35,16 @@ export const authApi: {
       body: JSON.stringify(payload),
     });
 
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      const text = await res.text();
+      throw new Error(`Server returned non-JSON response (${res.status}): ${text.slice(0,200)}`);
+    }
+
     const json = await res.json();
 
     if (!res.ok) {
-      throw new Error(json.msg || 'Failed to login');
+      throw new Error(json?.msg || `Failed to login (${res.status})`);
     }
 
     return json.data;
