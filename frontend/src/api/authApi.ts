@@ -1,9 +1,4 @@
-import type { AuthResult, RegisterPayload } from '../types/auth';
-
-type LoginPayload = {
-  email: string;
-  password: string;
-};
+import type { AuthResult, LoginPayload, RegisterPayload } from '../types/auth';
 
 const API_BASE_URL = 'http://localhost:8000/api';
 
