@@ -1,0 +1,223 @@
+import { useEffect, useMemo, useState } from 'react';
+import logoImage from '../assets/logo_himti.png';
+import homepageImageCard from '../assets/homepage_image_card.png';
+import { eventApi } from '../api/eventApi';
+import { registrationApi } from '../api/registrationApi';
+import type { AuthResult } from '../types/auth';
+import type { Event } from '../types/registration';
+
+interface HomePageProps {
+  auth: AuthResult;
+  onLogout: () => void;
+  onViewMyEvents: () => void;
+}
+
+export function HomePage({ auth, onLogout, onViewMyEvents }: HomePageProps) {
+  const [events, setEvents] = useState<Event[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [registeringId, setRegisteringId] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadEvents = async () => {
+      try {
+        setIsLoading(true);
+        const data = await eventApi.getAll();
+        setEvents(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load events');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadEvents();
+  }, []);
+
+  const filteredEvents = useMemo(() => {
+    return [...events].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }, [events]);
+
+  const handleRegister = async (eventId: string) => {
+    try {
+      setRegisteringId(eventId);
+      setSuccessMessage(null);
+      await registrationApi.register(eventId, auth.user.id);
+      setSuccessMessage('Registration successful! Check your My Events page.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Registration failed');
+    } finally {
+      setRegisteringId(null);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50">
+      <header className="bg-white shadow-sm">
+        <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4 px-6 py-4">
+          <div className="flex items-center gap-3">
+            <img src={logoImage} alt="HIMTI logo" className="h-12 w-12 rounded-2xl object-cover" />
+            <div>
+              <p className="text-sm text-slate-500">HIMIT Event Organizer</p>
+              <h1 className="text-xl font-semibold text-slate-900">Event management made easy</h1>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600">
+            <button type="button" className="rounded-full px-4 py-2 font-semibold text-slate-700 transition hover:bg-slate-100">
+              Home
+            </button>
+            <button type="button" className="rounded-full px-4 py-2 font-semibold text-slate-700 transition hover:bg-slate-100">
+              Events
+            </button>
+            <button type="button" className="rounded-full px-4 py-2 font-semibold text-slate-700 transition hover:bg-slate-100">
+              Tickets
+            </button>
+            <button type="button" className="rounded-full px-4 py-2 font-semibold text-slate-700 transition hover:bg-slate-100">
+              About
+            </button>
+            <div className="ml-3 rounded-full border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-800">
+              {auth.user.name}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-6xl mx-auto px-6 py-10">
+        <section className="mb-8 rounded-3xl bg-gradient-to-r from-sky-200 via-sky-100 to-slate-100 p-10 text-slate-900 shadow-lg">
+          <div className="grid gap-8 lg:grid-cols-[1.4fr_auto] lg:items-start">
+            <div className="space-y-6">
+              <div className="rounded-full bg-slate-100/95 px-4 py-3 text-sm text-slate-800 shadow-sm">
+                <span>Welcome back, {auth.user.name}!</span>
+              </div>
+              <div>
+                <h2 className="text-5xl font-bold leading-tight sm:text-6xl text-slate-900">Discover and join the latest HIMTI events</h2>
+                <p className="mt-5 text-lg text-slate-600">
+                  Discover and join the latest HIMTI events and activities around you.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="inline-flex items-center rounded-full bg-[#415AA7] px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-800"
+              >
+                Explore Events →
+              </button>
+            </div>
+
+            <div className="relative mx-auto w-full max-w-[28rem] overflow-hidden rounded-[2.5rem] bg-transparent lg:self-center">
+              <div className="flex h-[24rem] items-center justify-center">
+                <img src={homepageImageCard} alt="Homepage card illustration" className="h-full w-full object-contain" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {successMessage && (
+          <div className="mb-6 rounded-2xl bg-emerald-100 px-5 py-4 text-emerald-900 shadow-sm">
+            {successMessage}
+          </div>
+        )}
+
+        {error && (
+          <div className="mb-6 rounded-2xl bg-rose-100 px-5 py-4 text-rose-900 shadow-sm">
+            {error}
+          </div>
+        )}
+
+        {isLoading ? (
+          <div className="rounded-3xl bg-white p-12 text-center shadow-sm">
+            <p className="text-slate-500">Loading events...</p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+              <div className="rounded-3xl bg-white p-5 shadow-sm">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="text-sm text-slate-500">Showing 1 - {filteredEvents.length} of {events.length} events</div>
+                  <div className="text-sm text-slate-500">Updated just now</div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {filteredEvents.map((event) => {
+                  const formattedDate = new Date(event.date).toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                  });
+
+                  return (
+                    <article key={event.id} className="grid gap-4 overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm sm:grid-cols-[240px_1fr]">
+                      <div className="relative h-44 overflow-hidden bg-slate-200 sm:h-auto">
+                        {event.imageUrl ? (
+                          <img src={event.imageUrl} alt={event.title} className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="flex h-full items-center justify-center text-slate-400">No image</div>
+                        )}
+                      </div>
+                      <div className="p-6">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-blue-700">Event</span>
+                          <span className="text-sm text-slate-500">{formattedDate}</span>
+                        </div>
+                        <h3 className="mt-4 text-xl font-semibold text-slate-900">{event.title}</h3>
+                        <p className="mt-2 text-sm leading-6 text-slate-600 line-clamp-3">{event.description}</p>
+
+                        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                          <div className="flex items-center gap-2 text-sm text-slate-500">
+                            <span>📅</span>
+                            <span>{formattedDate}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-slate-500">
+                            <span>📍</span>
+                            <span>{event.location}</span>
+                          </div>
+                        </div>
+
+                        <div className="mt-6 flex flex-wrap items-center gap-3">
+                          <button
+                            type="button"
+                            className="rounded-full bg-blue-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-800"
+                          >
+                            See Details
+                          </button>
+                          <button
+                            type="button"
+                            disabled={registeringId === event.id}
+                            onClick={() => handleRegister(event.id)}
+                            className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {registeringId === event.id ? 'Registering...' : 'Cancel'}
+                          </button>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+
+                {filteredEvents.length === 0 && (
+                  <div className="rounded-3xl border border-slate-200 bg-white p-12 text-center shadow-sm">
+                    <p className="text-slate-500">No events match your search.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+        )}
+      </main>
+
+      <footer className="border-t border-slate-200 bg-white py-8">
+        <div className="max-w-6xl mx-auto flex flex-col gap-6 px-6 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-semibold text-slate-900">HIMIT Event Organizer</p>
+            <p className="text-sm text-slate-500">Organize events, manage attendance, and keep your community connected.</p>
+          </div>
+          <div className="flex flex-wrap items-center gap-4 text-sm text-slate-600">
+            <span>Support</span>
+            <span>Privacy</span>
+            <span>Terms</span>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
