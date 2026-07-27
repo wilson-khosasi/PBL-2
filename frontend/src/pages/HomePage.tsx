@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import logoImage from '../assets/logo_himti.png';
 import homepageImageCard from '../assets/homepage_image_card.png';
+import categoryIcon from '../assets/categori_icon.png';
+import searchIcon from '../assets/search_icon.png';
 import { eventApi } from '../api/eventApi';
 import { registrationApi } from '../api/registrationApi';
 import type { AuthResult } from '../types/auth';
@@ -18,6 +20,37 @@ export function HomePage({ auth, onLogout, onViewMyEvents }: HomePageProps) {
   const [error, setError] = useState<string | null>(null);
   const [registeringId, setRegisteringId] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState<'upcoming' | 'popular'>('upcoming');
+  const [selectedCategories, setSelectedCategories] = useState({
+    all: true,
+    workshop: true,
+    seminar: true,
+    competition: true,
+  });
+  const [dateFilter, setDateFilter] = useState<'all' | 'week' | 'month'>('all');
+  const [location, setLocation] = useState('All Locations');
+
+  const handleCategoryToggle = (key: keyof typeof selectedCategories) => {
+    setSelectedCategories((prev) => {
+      if (key === 'all') {
+        const newValue = !prev.all;
+        return {
+          all: newValue,
+          workshop: newValue,
+          seminar: newValue,
+          competition: newValue,
+        };
+      }
+
+      const next = {
+        ...prev,
+        [key]: !prev[key],
+      };
+      next.all = next.workshop && next.seminar && next.competition;
+      return next;
+    });
+  };
 
   useEffect(() => {
     const loadEvents = async () => {
@@ -36,8 +69,45 @@ export function HomePage({ auth, onLogout, onViewMyEvents }: HomePageProps) {
   }, []);
 
   const filteredEvents = useMemo(() => {
-    return [...events].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  }, [events]);
+    const normalized = searchTerm.trim().toLowerCase();
+
+    const matchesCategory = (event: Event) => {
+      if (selectedCategories.all) return true;
+      const text = `${event.title} ${event.description}`.toLowerCase();
+      if (text.includes('workshop') && selectedCategories.workshop) return true;
+      if (text.includes('seminar') && selectedCategories.seminar) return true;
+      if (text.includes('competition') && selectedCategories.competition) return true;
+      return false;
+    };
+
+    const matchesDate = (event: Event) => {
+      if (dateFilter === 'all') return true;
+      const eventDate = new Date(event.date);
+      const now = new Date();
+      const diffDays = (eventDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+      if (dateFilter === 'week') return diffDays >= 0 && diffDays <= 7;
+      return diffDays >= 0 && diffDays <= 30;
+    };
+
+    return [...events]
+      .filter((event) => {
+        if (normalized) {
+          const text = `${event.title} ${event.description} ${event.location}`.toLowerCase();
+          if (!text.includes(normalized)) return false;
+        }
+
+        if (!matchesCategory(event)) return false;
+        if (!matchesDate(event)) return false;
+        if (location !== 'All Locations' && event.location !== location) return false;
+
+        return true;
+      })
+      .sort((a, b) => {
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
+        return sortBy === 'upcoming' ? dateA - dateB : dateB - dateA;
+      });
+  }, [events, searchTerm, sortBy, selectedCategories, dateFilter, location]);
 
   const handleRegister = async (eventId: string) => {
     try {
@@ -130,7 +200,129 @@ export function HomePage({ auth, onLogout, onViewMyEvents }: HomePageProps) {
             <p className="text-slate-500">Loading events...</p>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
+            <aside className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="mb-8">
+                <h2 className="text-lg font-semibold text-slate-900">Filters</h2>
+                <p className="mt-2 text-sm text-slate-500">Refine your event search</p>
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900">
+                    <img src={categoryIcon} alt="Category icon" className="h-10 w-10 object-cover" />
+                    Category
+                  </div>
+                  <div className="space-y-2 rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                    {['all', 'workshop', 'seminar', 'competition'].map((key) => (
+                      <label key={key} className="flex items-center gap-3 text-sm text-slate-700">
+                        <input
+                          type="checkbox"
+                          checked={selectedCategories[key as keyof typeof selectedCategories]}
+                          onChange={() => handleCategoryToggle(key as keyof typeof selectedCategories)}
+                          className="h-4 w-4 rounded border-slate-300 text-blue-700"
+                        />
+                        <span>{key === 'all' ? 'All Categories' : key.charAt(0).toUpperCase() + key.slice(1)}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900">
+                    <img src={categoryIcon} alt="Date icon" className="h-10 w-10 object-cover" />
+                    Date
+                  </div>
+                  <div className="space-y-2 rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                    {[
+                      { value: 'all', label: 'All Dates' },
+                      { value: 'week', label: 'This Week' },
+                      { value: 'month', label: 'This Month' },
+                    ].map((option) => (
+                      <label key={option.value} className="flex items-center gap-3 text-sm text-slate-700">
+                        <input
+                          type="radio"
+                          name="date-filter"
+                          value={option.value}
+                          checked={dateFilter === option.value}
+                          onChange={() => setDateFilter(option.value as 'all' | 'week' | 'month')}
+                          className="h-4 w-4 text-blue-700"
+                        />
+                        <span>{option.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900">
+                    <img src={categoryIcon} alt="Location icon" className="h-10 w-10 object-cover" />
+                    Location
+                  </div>
+                  <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                    <select
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      className="w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    >
+                      <option>All Locations</option>
+                      <option>Binus Anggrek</option>
+                      <option>Binus Alam Sutera</option>
+                      <option>Online (Zoom)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedCategories({
+                    all: true,
+                    workshop: true,
+                    seminar: true,
+                    competition: true,
+                  });
+                  setDateFilter('all');
+                  setLocation('All Locations');
+                  setSearchTerm('');
+                }}
+                className="mt-6 w-full rounded-3xl border border-blue-700 bg-white px-4 py-3 text-sm font-semibold text-blue-700 transition hover:bg-blue-50"
+              >
+                Reset Filters
+              </button>
+            </aside>
+
+            <div className="space-y-6">
+              <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                  <div className="relative w-full lg:w-2/3">
+                    <label className="relative block">
+                      <span className="sr-only">Search events</span>
+                      <img src={searchIcon} alt="Search icon" className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="Search events..."
+                        className="w-full rounded-3xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      />
+                    </label>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-slate-500">Sort by</span>
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value as 'upcoming' | 'popular')}
+                      className="rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    >
+                      <option value="upcoming">Upcoming</option>
+                      <option value="popular">Popular</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
               <div className="rounded-3xl bg-white p-5 shadow-sm">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="text-sm text-slate-500">Showing 1 - {filteredEvents.length} of {events.length} events</div>
@@ -202,6 +394,7 @@ export function HomePage({ auth, onLogout, onViewMyEvents }: HomePageProps) {
                 )}
               </div>
             </div>
+          </div>
         )}
       </main>
 
