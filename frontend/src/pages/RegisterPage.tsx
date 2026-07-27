@@ -15,6 +15,8 @@ export function RegisterPage({ onRegistered, onSwitchToLogin }: RegisterPageProp
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
@@ -26,12 +28,24 @@ export function RegisterPage({ onRegistered, onSwitchToLogin }: RegisterPageProp
       return;
     }
 
+    // client-side validation
+    const emailValid = /.+@.+\.com$/.test(email);
+    const passwordValid = password.length >= 8 && /[A-Z]/.test(password) && /\d/.test(password);
+
+    setEmailError(emailValid ? null : 'Email must contain @ and end with .com');
+    setPasswordError(passwordValid ? null : 'Password must be at least 8 chars, contain an uppercase letter and a number');
+
+    if (!emailValid || !passwordValid) return;
+
     try {
       setIsSubmitting(true);
       const result = await authApi.register({ name, email, password, confirmPassword });
       onRegistered(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      const msg = err instanceof Error ? err.message : 'Something went wrong';
+      if (/email/i.test(msg)) setError('Invalid email');
+      else if (/password/i.test(msg)) setError('Invalid password');
+      else setError(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -62,6 +76,7 @@ export function RegisterPage({ onRegistered, onSwitchToLogin }: RegisterPageProp
               minLength={3}
               className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#3B4C9E] focus:border-transparent"
             />
+            {emailError && <p className="text-sm text-red-600 mt-1">{emailError}</p>}
           </div>
 
           <div>
@@ -77,6 +92,7 @@ export function RegisterPage({ onRegistered, onSwitchToLogin }: RegisterPageProp
               required
               className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#3B4C9E] focus:border-transparent"
             />
+            {passwordError && <p className="text-sm text-red-600 mt-1">{passwordError}</p>}
           </div>
 
           <div>

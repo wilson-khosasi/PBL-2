@@ -13,18 +13,33 @@ export function LoginPage({ onLoggedIn, onSwitchToRegister }: LoginPageProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
 
+    // client-side validation
+    const emailValid = /.+@.+\.com$/.test(email);
+    const passwordValid = password.length >= 8 && /[A-Z]/.test(password) && /\d/.test(password);
+
+    setEmailError(emailValid ? null : 'Email must contain @ and end with .com');
+    setPasswordError(passwordValid ? null : 'Password must be at least 8 chars, contain an uppercase letter and a number');
+
+    if (!emailValid || !passwordValid) return;
+
     try {
       setIsSubmitting(true);
       const result = await authApi.login({ email, password });
       onLoggedIn(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      const msg = err instanceof Error ? err.message : 'Something went wrong';
+      // try to show whether email or password was incorrect based on server message
+      if (/email/i.test(msg)) setError('Email not found');
+      else if (/password/i.test(msg)) setError('Incorrect password');
+      else setError(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -52,6 +67,7 @@ export function LoginPage({ onLoggedIn, onSwitchToRegister }: LoginPageProps) {
               required
               className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#3B4C9E] focus:border-transparent"
             />
+            {emailError && <p className="text-sm text-red-600 mt-1">{emailError}</p>}
           </div>
 
           <div>
@@ -67,6 +83,7 @@ export function LoginPage({ onLoggedIn, onSwitchToRegister }: LoginPageProps) {
               required
               className="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#3B4C9E] focus:border-transparent"
             />
+            {passwordError && <p className="text-sm text-red-600 mt-1">{passwordError}</p>}
           </div>
 
           {error && <p className="text-sm text-red-600 font-medium text-center">{error}</p>}
