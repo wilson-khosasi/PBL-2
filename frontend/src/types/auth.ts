@@ -18,3 +18,8 @@ export interface RegisterPayload {
   confirmPassword: string;
 }
 
+export interface LoginPayload {
+  email: string;
+  password: string;
+}
+
