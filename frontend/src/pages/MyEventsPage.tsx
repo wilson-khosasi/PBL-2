@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { registrationApi } from '../api/registrationApi';
 import { RegistrationCard } from '../components/RegistrationCard';
+import { Navbar } from '../components/Navbar';
+import { WelcomeBanner } from '../components/WelcomeBanner';
+import noEventsImage from '../assets/no-events.png';
 import type { Registration } from '../types/registration';
 
 // TEMP: ganti ke userId dari auth context/JWT pas Member 1 udah selesai
@@ -42,30 +45,20 @@ export function MyEventsPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <nav className="bg-gray-200 py-4 text-center font-semibold">[NAVBAR]</nav>
+      <Navbar />
 
-      <div className="max-w-3xl mx-auto p-6">
-        <div className="flex items-center gap-4 mb-8">
-          <div className="w-16 h-16 rounded-full border-2 border-blue-700 flex items-center justify-center text-blue-700 text-2xl">
-            👤
-          </div>
-          <div>
-            <p className="font-semibold text-lg">Welcome Home!!</p>
-            <p className="text-gray-600">[User name]</p>
-          </div>
-        </div>
+      <div className="max-w-4xl mx-auto p-6">
+        <WelcomeBanner />
 
-        <h2 className="font-semibold mb-4">Attended Events</h2>
+        <h2 className="font-semibold mb-4">Attended Event</h2>
 
         {isLoading && <p className="text-gray-500">Loading...</p>}
 
         {error && <p className="text-red-600">{error}</p>}
 
         {!isLoading && !error && registrations.length === 0 && (
-          <div className="flex justify-center py-16">
-            <div className="w-56 h-56 rounded-full bg-blue-400 flex items-center justify-center text-white text-center p-6 font-medium">
-              Seems like you don't have any Attended Events
-            </div>
+          <div className="flex justify-center py-8">
+            <img src={noEventsImage} alt="No events yet" className="max-w-sm w-full" />
           </div>
         )}
 
