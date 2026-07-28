@@ -12,9 +12,10 @@ interface HomePageProps {
   auth: AuthResult;
   onLogout: () => void;
   onViewMyEvents: () => void;
+  onViewEventDetail: (eventId: string) => void;
 }
 
-export function HomePage({ auth, onLogout, onViewMyEvents }: HomePageProps) {
+export function HomePage({ auth, onLogout, onViewMyEvents, onViewEventDetail }: HomePageProps) {
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -147,9 +148,23 @@ export function HomePage({ auth, onLogout, onViewMyEvents }: HomePageProps) {
             <button type="button" className="rounded-full px-4 py-2 font-semibold text-slate-700 transition hover:bg-slate-100">
               About
             </button>
+            <button
+              type="button"
+              onClick={onViewMyEvents}
+              className="rounded-full px-4 py-2 font-semibold text-blue-700 transition hover:bg-blue-50"
+            >
+              My Events
+            </button>
             <div className="ml-3 rounded-full border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-800">
               {auth.user.name}
             </div>
+            <button
+              type="button"
+              onClick={onLogout}
+              className="rounded-full border border-red-500 bg-white px-4 py-2 text-sm font-semibold text-red-500 transition hover:bg-red-50"
+            >
+              Logout
+            </button>
           </div>
         </div>
       </header>
@@ -369,6 +384,7 @@ export function HomePage({ auth, onLogout, onViewMyEvents }: HomePageProps) {
                         <div className="mt-6 flex flex-wrap items-center gap-3">
                           <button
                             type="button"
+                            onClick={() => onViewEventDetail(event.id)}
                             className="rounded-full bg-blue-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-800"
                           >
                             See Details
@@ -379,7 +395,7 @@ export function HomePage({ auth, onLogout, onViewMyEvents }: HomePageProps) {
                             onClick={() => handleRegister(event.id)}
                             className="rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
                           >
-                            {registeringId === event.id ? 'Registering...' : 'Cancel'}
+                            {registeringId === event.id ? 'Registering...' : 'Register'}
                           </button>
                         </div>
                       </div>
