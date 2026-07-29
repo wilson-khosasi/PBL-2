@@ -1,34 +1,59 @@
 import type { Event } from '../types/registration';
+import { dummyEvents, findDummyEventById } from '../data/dummyEvents';
 
 const API_BASE_URL = 'http://localhost:8000/api';
 
+const isNetworkError = (err: unknown): boolean => err instanceof TypeError;
+
 export const eventApi = {
   getAll: async (): Promise<Event[]> => {
-    const res = await fetch(`${API_BASE_URL}/events`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
+    try {
+      const res = await fetch(`${API_BASE_URL}/events`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
 
-    const json = await res.json();
-    if (!res.ok) {
-      throw new Error(json?.msg || 'Failed to load events');
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json?.msg || 'Failed to load events');
+      }
+
+      if (!Array.isArray(json.data) || json.data.length === 0) {
+        return dummyEvents;
+      }
+
+      return json.data;
+    } catch (err) {
+      if (isNetworkError(err)) {
+       
+      }
+      throw err;
     }
-
-    return json.data;
   },
 
   getById: async (id: string): Promise<Event> => {
-    const res = await fetch(`${API_BASE_URL}/events/${id}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
+    try {
+      const res = await fetch(`${API_BASE_URL}/events/${id}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
 
-    const json = await res.json();
-    if (!res.ok) {
-      throw new Error(json?.msg || 'Failed to load event');
+      const json = await res.json();
+      if (!res.ok) {
+        const fallback = findDummyEventById(id);
+        if (fallback) return fallback;
+        throw new Error(json?.msg || 'Failed to load event');
+      }
+
+      return json.data;
+    } catch (err) {
+      const fallback = findDummyEventById(id);
+      if (fallback) return fallback;
+      if (isNetworkError(err)) {
+        throw new Error('Unable to reach the server, and no matching dummy event was found.');
+      }
+      throw err;
     }
-
-    return json.data;
   },
 
   create: async (eventData: Omit<Event, 'id'>): Promise<Event> => {

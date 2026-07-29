@@ -28,8 +28,9 @@ export function RegisterPage({ onRegistered, onSwitchToLogin }: RegisterPageProp
       return;
     }
 
-    // client-side validation
-    const emailValid = /.+@.+\.com$/.test(email);
+   
+    const trimmedEmail = email.trim();
+    const emailValid = /.+@.+\.com$/.test(trimmedEmail);
     const passwordValid = password.length >= 8 && /[A-Z]/.test(password) && /\d/.test(password);
 
     setEmailError(emailValid ? null : 'Email must contain @ and end with .com');
@@ -39,13 +40,11 @@ export function RegisterPage({ onRegistered, onSwitchToLogin }: RegisterPageProp
 
     try {
       setIsSubmitting(true);
-      const result = await authApi.register({ name, email, password, confirmPassword });
+      const result = await authApi.register({ name, email: trimmedEmail, password, confirmPassword });
       onRegistered(result);
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Something went wrong';
-      if (/email/i.test(msg)) setError('Invalid email');
-      else if (/password/i.test(msg)) setError('Invalid password');
-      else setError(msg);
+      setError(msg);
     } finally {
       setIsSubmitting(false);
     }

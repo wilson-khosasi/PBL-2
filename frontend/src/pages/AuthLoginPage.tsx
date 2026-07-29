@@ -21,8 +21,9 @@ export function LoginPage({ onLoggedIn, onSwitchToRegister }: LoginPageProps) {
     e.preventDefault();
     setError(null);
 
-    // client-side validation
-    const emailValid = /.+@.+\.com$/.test(email);
+    
+    const trimmedEmail = email.trim();
+    const emailValid = /.+@.+\.com$/.test(trimmedEmail);
     const passwordValid = password.length >= 8 && /[A-Z]/.test(password) && /\d/.test(password);
 
     setEmailError(emailValid ? null : 'Email must contain @ and end with .com');
@@ -32,14 +33,11 @@ export function LoginPage({ onLoggedIn, onSwitchToRegister }: LoginPageProps) {
 
     try {
       setIsSubmitting(true);
-      const result = await authApi.login({ email, password });
+      const result = await authApi.login({ email: trimmedEmail, password });
       onLoggedIn(result);
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Something went wrong';
-      // try to show whether email or password was incorrect based on server message
-      if (/email/i.test(msg)) setError('Email not found');
-      else if (/password/i.test(msg)) setError('Incorrect password');
-      else setError(msg);
+      setError(msg);
     } finally {
       setIsSubmitting(false);
     }

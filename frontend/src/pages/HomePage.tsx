@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import logoImage from '../assets/logo_himti.png';
-import homepageImageCard from '../assets/homepage_image_card.png';
+import welcomeBanner from '../assets/welcome_banner.png';
 import categoryIcon from '../assets/categori_icon.png';
 import searchIcon from '../assets/search_icon.png';
 import { eventApi } from '../api/eventApi';
@@ -170,32 +170,8 @@ export function HomePage({ auth, onLogout, onViewMyEvents, onViewEventDetail }: 
       </header>
 
       <main className="max-w-6xl mx-auto px-6 py-10">
-        <section className="mb-8 rounded-3xl bg-gradient-to-r from-sky-200 via-sky-100 to-slate-100 p-10 text-slate-900 shadow-lg">
-          <div className="grid gap-8 lg:grid-cols-[1.4fr_auto] lg:items-start">
-            <div className="space-y-6">
-              <div className="rounded-full bg-slate-100/95 px-4 py-3 text-sm text-slate-800 shadow-sm">
-                <span>Welcome back, {auth.user.name}!</span>
-              </div>
-              <div>
-                <h2 className="text-5xl font-bold leading-tight sm:text-6xl text-slate-900">Discover and join the latest HIMTI events</h2>
-                <p className="mt-5 text-lg text-slate-600">
-                  Discover and join the latest HIMTI events and activities around you.
-                </p>
-              </div>
-              <button
-                type="button"
-                className="inline-flex items-center rounded-full bg-[#415AA7] px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-800"
-              >
-                Explore Events →
-              </button>
-            </div>
-
-            <div className="relative mx-auto w-full max-w-[28rem] overflow-hidden rounded-[2.5rem] bg-transparent lg:self-center">
-              <div className="flex h-[24rem] items-center justify-center">
-                <img src={homepageImageCard} alt="Homepage card illustration" className="h-full w-full object-contain" />
-              </div>
-            </div>
-          </div>
+        <section className="mb-8 overflow-hidden rounded-3xl shadow-lg">
+          <img src={welcomeBanner} alt="Welcome back" className="h-auto w-full object-cover" />
         </section>
 
         {successMessage && (
