@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react';
 import { registrationApi } from '../api/registrationApi';
 import { RegistrationCard } from '../components/RegistrationCard';
+import type { AuthResult } from '../types/auth';
 import type { Registration } from '../types/registration';
 
-// TEMP: ganti ke userId dari auth context/JWT pas Member 1 udah selesai
-const TEMP_USER_ID = '8aad09ad-e5e1-452e-947c-900f0be862a9';
+interface MyEventsPageProps {
+  auth: AuthResult;
+  onLogout: () => void;
+  onBack: () => void;
+}
 
-export function MyEventsPage() {
+export function MyEventsPage({ auth, onLogout, onBack }: MyEventsPageProps) {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -15,7 +19,7 @@ export function MyEventsPage() {
   const fetchRegistrations = async () => {
     try {
       setIsLoading(true);
-      const data = await registrationApi.getMyRegistrations(TEMP_USER_ID);
+      const data = await registrationApi.getMyRegistrations(auth.user.id);
       setRegistrations(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
@@ -31,7 +35,7 @@ export function MyEventsPage() {
   const handleCancel = async (registrationId: string) => {
     try {
       setCancellingId(registrationId);
-      await registrationApi.cancel(registrationId, TEMP_USER_ID);
+      await registrationApi.cancel(registrationId, auth.user.id);
       setRegistrations((prev) => prev.filter((r) => r.id !== registrationId));
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to cancel');
@@ -41,17 +45,40 @@ export function MyEventsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <nav className="bg-gray-200 py-4 text-center font-semibold">[NAVBAR]</nav>
+    <div className="min-h-screen bg-slate-50">
+      <header className="bg-white shadow-sm">
+        <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4 px-6 py-4">
+          <div>
+            <p className="text-sm text-blue-700 font-semibold">My Events</p>
+            <p className="text-sm text-slate-500">{auth.user.name}</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={onBack}
+              className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400"
+            >
+              Back to Home
+            </button>
+            <button
+              type="button"
+              onClick={onLogout}
+              className="rounded-full bg-blue-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-800"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      </header>
 
-      <div className="max-w-3xl mx-auto p-6">
+      <main className="max-w-3xl mx-auto p-6">
         <div className="flex items-center gap-4 mb-8">
           <div className="w-16 h-16 rounded-full border-2 border-blue-700 flex items-center justify-center text-blue-700 text-2xl">
             👤
           </div>
           <div>
-            <p className="font-semibold text-lg">Welcome Home!!</p>
-            <p className="text-gray-600">[User name]</p>
+            <p className="font-semibold text-lg">Welcome back, {auth.user.name}!</p>
+            <p className="text-gray-600">Your saved events appear below.</p>
           </div>
         </div>
 
@@ -81,7 +108,7 @@ export function MyEventsPage() {
             ))}
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }
