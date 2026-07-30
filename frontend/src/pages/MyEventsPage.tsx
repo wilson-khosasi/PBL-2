@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
 import { registrationApi } from '../api/registrationApi';
 import { RegistrationCard } from '../components/RegistrationCard';
-import { Navbar } from '../components/Navbar';
+// import { Navbar } from '../components/Navbar';
 import { WelcomeBanner } from '../components/WelcomeBanner';
 import noEventsImage from '../assets/no-events.png';
 import type { Registration } from '../types/registration';
 
-// TEMP: ganti ke userId dari auth context/JWT pas Member 1 udah selesai
 const TEMP_USER_ID = '8aad09ad-e5e1-452e-947c-900f0be862a9';
 
 export function MyEventsPage() {
@@ -45,7 +44,7 @@ export function MyEventsPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Navbar />
+      {/* <Navbar /> */}
 
       <div className="max-w-4xl mx-auto p-6">
         <WelcomeBanner />
