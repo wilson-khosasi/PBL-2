@@ -21,7 +21,7 @@ export function AuthField({
 }: AuthFieldProps) {
   return (
     <div>
-      <label htmlFor={id} className="mb-2 block text-lg font-medium text-black/65 sm:text-xl">
+      <label htmlFor={id} className="mb-1.5 block text-base font-medium text-black/65 sm:mb-2 sm:text-lg lg:text-xl">
         {label}
       </label>
       <input
@@ -31,7 +31,7 @@ export function AuthField({
         placeholder={placeholder}
         disabled={disabled}
         onChange={(event) => onChange(event.target.value)}
-        className={`w-full rounded-[22px] border-2 bg-white px-5 py-4 text-lg text-black outline-none transition placeholder:text-black/40 focus:border-[#415aa7] focus:ring-4 focus:ring-[#415aa7]/15 disabled:cursor-not-allowed disabled:bg-black/5 sm:rounded-[28px] sm:px-6 sm:py-5 sm:text-xl ${
+        className={`w-full rounded-[18px] border-2 bg-white px-4 py-3 text-base text-black outline-none transition placeholder:text-black/40 focus:border-[#415aa7] focus:ring-4 focus:ring-[#415aa7]/15 disabled:cursor-not-allowed disabled:bg-black/5 sm:rounded-[22px] sm:px-5 sm:py-3.5 sm:text-lg lg:rounded-[26px] lg:px-6 lg:py-4 lg:text-xl ${
           error ? 'border-red-500' : 'border-black/20'
         }`}
       />

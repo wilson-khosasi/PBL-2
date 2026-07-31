@@ -65,7 +65,7 @@ export function RegisterPage() {
         </>
       }
     >
-      <form className="space-y-5 sm:space-y-6" onSubmit={handleSubmit} noValidate>
+      <form className="space-y-4 sm:space-y-5 lg:space-y-6" onSubmit={handleSubmit} noValidate>
         <AuthField
           id="fullName"
           label="Full Name"
@@ -112,7 +112,7 @@ export function RegisterPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full rounded-[22px] border-2 border-black/20 bg-[#415aa7] px-6 py-4 text-xl font-medium text-white transition hover:bg-[#31498f] focus:outline-none focus:ring-4 focus:ring-[#415aa7]/30 disabled:cursor-not-allowed disabled:opacity-60 sm:rounded-[28px] sm:py-5 sm:text-2xl"
+          className="w-full rounded-[18px] border-2 border-black/20 bg-[#415aa7] px-6 py-3 text-lg font-medium text-white transition hover:bg-[#31498f] focus:outline-none focus:ring-4 focus:ring-[#415aa7]/30 disabled:cursor-not-allowed disabled:opacity-60 sm:rounded-[22px] sm:py-3.5 sm:text-xl lg:rounded-[26px] lg:py-4 lg:text-2xl"
         >
           {isSubmitting ? 'Creating account...' : 'Register'}
         </button>
