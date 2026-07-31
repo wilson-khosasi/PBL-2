@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
 import { registrationApi } from '../api/registrationApi';
 import { RegistrationCard } from '../components/RegistrationCard';
-// import { Navbar } from '../components/Navbar';
-import { WelcomeBanner } from '../components/WelcomeBanner';
-import noEventsImage from '../assets/no-events.png';
+import type { AuthResult } from '../types/auth';
 import type { Registration } from '../types/registration';
 
-const TEMP_USER_ID = '8aad09ad-e5e1-452e-947c-900f0be862a9';
+interface MyEventsPageProps {
+  auth: AuthResult;
+  onLogout: () => void;
+  onBack: () => void;
+}
 
-export function MyEventsPage() {
+export function MyEventsPage({ auth, onLogout, onBack }: MyEventsPageProps) {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -17,7 +19,7 @@ export function MyEventsPage() {
   const fetchRegistrations = async () => {
     try {
       setIsLoading(true);
-      const data = await registrationApi.getMyRegistrations(TEMP_USER_ID);
+      const data = await registrationApi.getMyRegistrations(auth.user.id);
       setRegistrations(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
@@ -33,7 +35,7 @@ export function MyEventsPage() {
   const handleCancel = async (registrationId: string) => {
     try {
       setCancellingId(registrationId);
-      await registrationApi.cancel(registrationId, TEMP_USER_ID);
+      await registrationApi.cancel(registrationId, auth.user.id);
       setRegistrations((prev) => prev.filter((r) => r.id !== registrationId));
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to cancel');
@@ -73,7 +75,7 @@ export function MyEventsPage() {
             ))}
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }
