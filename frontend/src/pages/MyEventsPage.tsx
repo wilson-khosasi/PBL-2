@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { registrationApi } from '../api/registrationApi';
 import { RegistrationCard } from '../components/RegistrationCard';
+import { useAuth } from '../hooks/useAuth';
 import type { Registration } from '../types/registration';
 
 // TEMP: ganti ke userId dari auth context/JWT pas Member 1 udah selesai
 const TEMP_USER_ID = '8aad09ad-e5e1-452e-947c-900f0be862a9';
 
 export function MyEventsPage() {
+  const { user, logout } = useAuth();
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -42,7 +44,12 @@ export function MyEventsPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <nav className="bg-gray-200 py-4 text-center font-semibold">[NAVBAR]</nav>
+      <nav className="flex items-center justify-between bg-gray-200 px-6 py-4 font-semibold">
+        <span>My Events</span>
+        <button onClick={logout} className="rounded-full bg-[#415aa7] px-4 py-2 text-sm text-white hover:bg-[#31498f]">
+          Logout
+        </button>
+      </nav>
 
       <div className="max-w-3xl mx-auto p-6">
         <div className="flex items-center gap-4 mb-8">
@@ -51,7 +58,7 @@ export function MyEventsPage() {
           </div>
           <div>
             <p className="font-semibold text-lg">Welcome Home!!</p>
-            <p className="text-gray-600">[User name]</p>
+            <p className="text-gray-600">{user?.fullName}</p>
           </div>
         </div>
 

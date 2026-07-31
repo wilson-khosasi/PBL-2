@@ -1,28 +1,28 @@
-import { useState } from 'react';
-import { RegisterPage } from './pages/RegisterPage';
-import LoginPage from './pages/AuthLoginPage';
+import { useAuth } from './hooks/useAuth';
 import { MyEventsPage } from './pages/MyEventsPage';
-import type { AuthResult } from './types/auth';
+import { LoginPage } from './pages/LoginPage';
+import { RegisterPage } from './pages/RegisterPage';
 
 function App() {
-  const [auth, setAuth] = useState<AuthResult | null>(null);
-  const [showLogin, setShowLogin] = useState(true);
+  const { user, isRestoringSession } = useAuth();
 
-  if (!auth) {
-    return showLogin ? (
-      <LoginPage
-        onLoggedIn={(result: AuthResult) => setAuth(result)}
-        onSwitchToRegister={() => setShowLogin(false)}
-      />
-    ) : (
-      <RegisterPage
-        onRegistered={(result: AuthResult) => setAuth(result)}
-        onSwitchToLogin={() => setShowLogin(true)}
-      />
+  if (isRestoringSession) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#e3e3e3] font-['Poppins',sans-serif] text-lg font-medium text-black/65">
+        Restoring your session...
+      </main>
     );
   }
 
-  return <MyEventsPage />;
+  if (user) {
+    return <MyEventsPage />;
+  }
+
+  if (window.location.pathname === '/register') {
+    return <RegisterPage />;
+  }
+
+  return <LoginPage />;
 }
 
 export default App;
