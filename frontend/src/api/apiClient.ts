@@ -21,6 +21,8 @@ if (!configuredApiBaseUrl) {
 
 export const API_BASE_URL = configuredApiBaseUrl.replace(/\/$/, '');
 
+const TOKEN_STORAGE_KEY = 'event-registration-token';
+
 export class ApiError extends Error {
   status: number;
   validationIssues: ValidationIssue[];
@@ -48,10 +50,13 @@ export const apiRequest = async <T>(
   path: string,
   options: RequestInit = {},
 ): Promise<ApiResponse<T>> => {
+  const token = localStorage.getItem(TOKEN_STORAGE_KEY);
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },
   });

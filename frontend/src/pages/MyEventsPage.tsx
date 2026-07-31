@@ -4,9 +4,6 @@ import { RegistrationCard } from '../components/RegistrationCard';
 import { useAuth } from '../hooks/useAuth';
 import type { Registration } from '../types/registration';
 
-// TEMP: ganti ke userId dari auth context/JWT pas Member 1 udah selesai
-const TEMP_USER_ID = '8aad09ad-e5e1-452e-947c-900f0be862a9';
-
 export function MyEventsPage() {
   const { user, logout } = useAuth();
   const [registrations, setRegistrations] = useState<Registration[]>([]);
@@ -17,7 +14,7 @@ export function MyEventsPage() {
   const fetchRegistrations = async () => {
     try {
       setIsLoading(true);
-      const data = await registrationApi.getMyRegistrations(TEMP_USER_ID);
+      const data = await registrationApi.getMyRegistrations();
       setRegistrations(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
@@ -33,7 +30,7 @@ export function MyEventsPage() {
   const handleCancel = async (registrationId: string) => {
     try {
       setCancellingId(registrationId);
-      await registrationApi.cancel(registrationId, TEMP_USER_ID);
+      await registrationApi.cancel(registrationId);
       setRegistrations((prev) => prev.filter((r) => r.id !== registrationId));
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to cancel');
