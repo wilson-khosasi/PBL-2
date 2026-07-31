@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { registrationApi } from '../api/registrationApi';
 import { RegistrationCard } from '../components/RegistrationCard';
+import { WelcomeBanner } from '../components/WelcomeBanner';
+import noEventsImage from '../assets/no-events.png';
 import type { AuthResult } from '../types/auth';
 import type { Registration } from '../types/registration';
 
@@ -46,12 +48,35 @@ export function MyEventsPage({ auth, onLogout, onBack }: MyEventsPageProps) {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* <Navbar /> */}
+      <header className="bg-white shadow-sm">
+        <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4 px-6 py-4">
+          <div>
+            <p className="text-sm text-blue-700 font-semibold">My Events</p>
+            <p className="text-sm text-slate-500">{auth.user.name}</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={onBack}
+              className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400"
+            >
+              Back to Home
+            </button>
+            <button
+              type="button"
+              onClick={onLogout}
+              className="rounded-full bg-blue-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-800"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      </header>
 
       <div className="max-w-4xl mx-auto p-6">
         <WelcomeBanner />
 
-        <h2 className="font-semibold mb-4">Attended Event</h2>
+        <h2 className="font-semibold mb-4">Attended Events</h2>
 
         {isLoading && <p className="text-gray-500">Loading...</p>}
 
@@ -75,7 +100,7 @@ export function MyEventsPage({ auth, onLogout, onBack }: MyEventsPageProps) {
             ))}
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 }
