@@ -1,70 +1,60 @@
-import type { Request, Response, NextFunction } from 'express';
-import { prisma } from '@/config/prisma.js';
+import type { NextFunction, Request, Response } from 'express';
+import { LoginSchema, RegisterSchema } from './authSchema.js';
+import { authService } from './authService.js';
 
-export const register = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { name, email, password, confirmPassword } = req.body as {
-      name: string;
-      email: string;
-      password: string;
-      confirmPassword: string;
-    };
+export const register = async (
+   req: Request,
+   res: Response,
+   next: NextFunction,
+) => {
+   try {
+      const input = RegisterSchema.parse(req.body);
+      const user = await authService.register(input);
 
-    if (!name || !email || !password || !confirmPassword) {
-      return res.status(400).json({ msg: 'Missing fields' });
-    }
-
-    if (password !== confirmPassword) {
-      return res.status(400).json({ msg: 'Passwords do not match' });
-    }
-
-    if (!/.+@.+\.com$/.test(email)) {
-      return res.status(400).json({ msg: 'Invalid email' });
-    }
-
-    if (!(password.length >= 8 && /[A-Z]/.test(password) && /\d/.test(password))) {
-      return res.status(400).json({ msg: 'Invalid password' });
-    }
-
-    const normalizedEmail = email.toLowerCase();
-
-    const exists = await prisma.user.findUnique({ where: { email: normalizedEmail } });
-    if (exists) return res.status(409).json({ msg: 'Email already registered' });
-
-    const user = await prisma.user.create({
-      data: { name, email: normalizedEmail, password, role: 'user' },
-    });
-
-    return res.status(201).json({
-      data: {
-        user: { id: user.id, name: user.name, email: user.email, role: user.role, createdAt: user.createdAt },
-        token: `fake-token-${user.id}`,
-      },
-    });
-  } catch (err) {
-    next(err);
-  }
+      res.status(201).json({
+         msg: 'User registered successfully',
+         data: { user },
+      });
+   } catch (err) {
+      next(err);
+   }
 };
 
-export const login = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { email, password } = req.body as { email: string; password: string };
-    if (!email || !password) return res.status(400).json({ msg: 'Missing credentials' });
+export const login = async (
+   req: Request,
+   res: Response,
+   next: NextFunction,
+) => {
+   try {
+      const input = LoginSchema.parse(req.body);
+      const result = await authService.login(input);
 
-    const user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
-    if (!user) return res.status(404).json({ msg: 'Email not found' });
-
-    if (user.password !== password) return res.status(401).json({ msg: 'Incorrect password' });
-
-    return res.status(200).json({
-      data: {
-        user: { id: user.id, name: user.name, email: user.email, role: user.role, createdAt: user.createdAt },
-        token: `fake-token-${user.id}`,
-      },
-    });
-  } catch (err) {
-    next(err);
-  }
+      res.status(200).json({
+         msg: 'Login successful',
+         data: result,
+      });
+   } catch (err) {
+      next(err);
+   }
 };
 
-export default { register, login };
+export const getCurrentUser = async (
+   req: Request,
+   res: Response,
+   next: NextFunction,
+) => {
+   try {
+      if (!req.user) {
+         throw new Error('Authenticated user is missing from the request');
+      }
+
+      const user = await authService.getCurrentUser(req.user.id);
+
+      res.status(200).json({
+         msg: 'Authenticated user retrieved successfully',
+         data: { user },
+      });
+   } catch (err) {
+      next(err);
+   }
+};

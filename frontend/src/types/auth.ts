@@ -1,25 +1,25 @@
+export type UserRole = 'USER' | 'ADMIN';
+
 export interface AuthUser {
   id: string;
-  name: string;
+  fullName: string;
   email: string;
-  role: string;
-  createdAt: string;
+  role: UserRole;
 }
 
-export interface AuthResult {
-  user: AuthUser;
-  token: string;
-}
-
-export interface RegisterPayload {
-  name: string;
+export interface RegisterInput {
+  fullName: string;
   email: string;
   password: string;
   confirmPassword: string;
 }
 
-export interface LoginPayload {
+export interface LoginInput {
   email: string;
   password: string;
 }
 
+export interface LoginResult {
+  token: string;
+  user: AuthUser;
+}

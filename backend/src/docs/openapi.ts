@@ -2,11 +2,13 @@ import {
    OpenAPIRegistry,
    OpenApiGeneratorV3,
 } from '@asteasolutions/zod-to-openapi';
+import { registerAuthDocs } from '@/features/auth/authDocs.js';
 import { registerHealthDocs } from '@/docs/healthDocs.js';
 
 const registry = new OpenAPIRegistry();
 
 registerHealthDocs(registry);
+registerAuthDocs(registry);
 
 export const generateOpenApiDocument = () => {
    const generator = new OpenApiGeneratorV3(registry.definitions);
