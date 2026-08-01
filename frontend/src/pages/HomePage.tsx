@@ -5,17 +5,17 @@ import categoryIcon from '../assets/categori_icon.png';
 import searchIcon from '../assets/search_icon.png';
 import { eventApi } from '../api/eventApi';
 import { registrationApi } from '../api/registrationApi';
-import type { AuthResult } from '../types/auth';
+import type { AuthUser } from '../types/auth';
 import type { Event } from '../types/registration';
 
 interface HomePageProps {
-  auth: AuthResult;
+  user: AuthUser;
   onLogout: () => void;
   onViewMyEvents: () => void;
   onViewEventDetail: (eventId: string) => void;
 }
 
-export function HomePage({ auth, onLogout, onViewMyEvents, onViewEventDetail }: HomePageProps) {
+export function HomePage({ user, onLogout, onViewMyEvents, onViewEventDetail }: HomePageProps) {
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -114,7 +114,7 @@ export function HomePage({ auth, onLogout, onViewMyEvents, onViewEventDetail }: 
     try {
       setRegisteringId(eventId);
       setSuccessMessage(null);
-      await registrationApi.register(eventId, auth.user.id);
+      await registrationApi.register(eventId);
       setSuccessMessage('Registration successful! Check your My Events page.');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed');
@@ -156,7 +156,7 @@ export function HomePage({ auth, onLogout, onViewMyEvents, onViewEventDetail }: 
               My Events
             </button>
             <div className="ml-3 rounded-full border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-800">
-              {auth.user.name}
+              {user.fullName}
             </div>
             <button
               type="button"

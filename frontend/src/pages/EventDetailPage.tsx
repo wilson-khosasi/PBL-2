@@ -3,17 +3,17 @@ import logoImage from '../assets/logo_himti.png';
 import { eventApi } from '../api/eventApi';
 import { registrationApi } from '../api/registrationApi';
 import { withEventExtras } from '../data/dummyEvents';
-import type { AuthResult } from '../types/auth';
+import type { AuthUser } from '../types/auth';
 import type { Event } from '../types/registration';
 
 interface EventDetailPageProps {
   eventId: string;
-  auth: AuthResult;
+  user: AuthUser;
   onBack: () => void;
   onLogout: () => void;
 }
 
-export function EventDetailPage({ eventId, auth, onBack, onLogout }: EventDetailPageProps) {
+export function EventDetailPage({ eventId, user, onBack, onLogout }: EventDetailPageProps) {
   const [event, setEvent] = useState<Event | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -54,7 +54,7 @@ export function EventDetailPage({ eventId, auth, onBack, onLogout }: EventDetail
       setIsRegistering(true);
       setSuccessMessage(null);
       setError(null);
-      await registrationApi.register(eventId, auth.user.id);
+      await registrationApi.register(eventId);
       setSuccessMessage('Registration successful! Check your My Events page.');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed');
@@ -88,7 +88,7 @@ export function EventDetailPage({ eventId, auth, onBack, onLogout }: EventDetail
             </button>
             <div className="ml-3 flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-800">
               <span className="text-lg">👤</span>
-              {auth.user.name}
+              {user.fullName}
             </div>
             <button
               type="button"

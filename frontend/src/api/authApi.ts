@@ -1,52 +1,32 @@
-import type { AuthResult, LoginPayload, RegisterPayload } from '../types/auth';
+import { apiRequest } from './apiClient';
+import type { AuthUser, LoginInput, LoginResult, RegisterInput } from '../types/auth';
 
-const API_BASE_URL = 'http://localhost:8000/api';
-
-export const authApi: {
-  register: (payload: RegisterPayload) => Promise<AuthResult>;
-  login: (payload: LoginPayload) => Promise<AuthResult>;
-} = {
-  register: async (payload: RegisterPayload): Promise<AuthResult> => {
-    const res = await fetch(`${API_BASE_URL}/auth/register`, {
+export const authApi = {
+  register: async (input: RegisterInput) => {
+    const response = await apiRequest<{ user: AuthUser }>('/auth/register', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(input),
     });
 
-    const contentType = res.headers.get('content-type') || '';
-    if (!contentType.includes('application/json')) {
-      const text = await res.text();
-      throw new Error(`Server returned non-JSON response (${res.status}): ${text.slice(0,200)}`);
-    }
-
-    const json = await res.json();
-
-    if (!res.ok) {
-      throw new Error(json?.msg || `Failed to register (${res.status})`);
-    }
-
-    return json.data;
+    return response.data.user;
   },
 
-  login: async (payload: LoginPayload): Promise<AuthResult> => {
-    const res = await fetch(`${API_BASE_URL}/auth/login`, {
+  login: async (input: LoginInput): Promise<LoginResult> => {
+    const response = await apiRequest<LoginResult>('/auth/login', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(input),
     });
 
-    const contentType = res.headers.get('content-type') || '';
-    if (!contentType.includes('application/json')) {
-      const text = await res.text();
-      throw new Error(`Server returned non-JSON response (${res.status}): ${text.slice(0,200)}`);
-    }
+    return response.data;
+  },
 
-    const json = await res.json();
+  getCurrentUser: async (token: string): Promise<AuthUser> => {
+    const response = await apiRequest<{ user: AuthUser }>('/auth/me', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-    if (!res.ok) {
-      throw new Error(json?.msg || `Failed to login (${res.status})`);
-    }
-
-    return json.data;
+    return response.data.user;
   },
 };

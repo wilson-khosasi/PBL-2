@@ -1,18 +1,18 @@
-import type { AuthResult } from '../types/auth';
+import type { AuthUser } from '../types/auth';
 
 interface NavbarProps {
-  auth: AuthResult;
+  user: AuthUser;
   onLogout: () => void;
   onViewMyEvents: () => void;
 }
 
-export function Navbar({ auth, onLogout, onViewMyEvents }: NavbarProps) {
+export function Navbar({ user, onLogout, onViewMyEvents }: NavbarProps) {
   return (
     <header className="bg-white shadow-sm">
       <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4 px-6 py-4">
         <div>
           <p className="text-sm text-blue-700 font-semibold">Eventify</p>
-          <p className="text-sm text-slate-500">Hi, {auth.user.name}</p>
+          <p className="text-sm text-slate-500">Hi, {user.fullName}</p>
         </div>
 
         <div className="flex items-center gap-3">
