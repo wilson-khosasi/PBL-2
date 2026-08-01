@@ -169,7 +169,7 @@ npm run prisma:generate
 
 ### Optional: seed event data
 
-The backend includes a seed script for sample event data:
+The backend includes a seed script for sample event data. It adds any missing sample events and does not delete existing users, events, or registrations:
 
 ```powershell
 npm run prisma:seed
