@@ -1,15 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import { randomUUID } from 'crypto';
-
-type User = {
-  id: string;
-  name: string;
-  email: string;
-  password: string; // NOTE: plain-text for dev only
-};
-
-// simple in-memory user store for development
-const users: User[] = [];
+import { prisma } from '@/config/prisma.js';
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -36,13 +26,21 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
       return res.status(400).json({ msg: 'Invalid password' });
     }
 
-    const exists = users.find((u) => u.email === email.toLowerCase());
+    const normalizedEmail = email.toLowerCase();
+
+    const exists = await prisma.user.findUnique({ where: { email: normalizedEmail } });
     if (exists) return res.status(409).json({ msg: 'Email already registered' });
 
-    const user: User = { id: randomUUID(), name, email: email.toLowerCase(), password };
-    users.push(user);
+    const user = await prisma.user.create({
+      data: { name, email: normalizedEmail, password, role: 'user' },
+    });
 
-    return res.status(201).json({ data: { user: { id: user.id, name: user.name, email: user.email, role: 'member', createdAt: new Date().toISOString() }, token: `fake-token-${user.id}` } });
+    return res.status(201).json({
+      data: {
+        user: { id: user.id, name: user.name, email: user.email, role: user.role, createdAt: user.createdAt },
+        token: `fake-token-${user.id}`,
+      },
+    });
   } catch (err) {
     next(err);
   }
@@ -53,12 +51,17 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     const { email, password } = req.body as { email: string; password: string };
     if (!email || !password) return res.status(400).json({ msg: 'Missing credentials' });
 
-    const user = users.find((u) => u.email === email.toLowerCase());
+    const user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
     if (!user) return res.status(404).json({ msg: 'Email not found' });
 
     if (user.password !== password) return res.status(401).json({ msg: 'Incorrect password' });
 
-    return res.status(200).json({ data: { user: { id: user.id, name: user.name, email: user.email, role: 'member', createdAt: new Date().toISOString() }, token: `fake-token-${user.id}` } });
+    return res.status(200).json({
+      data: {
+        user: { id: user.id, name: user.name, email: user.email, role: user.role, createdAt: user.createdAt },
+        token: `fake-token-${user.id}`,
+      },
+    });
   } catch (err) {
     next(err);
   }
