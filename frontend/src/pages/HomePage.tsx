@@ -5,6 +5,7 @@ import categoryIcon from '../assets/categori_icon.png';
 import searchIcon from '../assets/search_icon.png';
 import { eventApi } from '../api/eventApi';
 import { registrationApi } from '../api/registrationApi';
+import { withEventExtras } from '../data/dummyEvents';
 import type { AuthUser } from '../types/auth';
 import type { Event } from '../types/registration';
 
@@ -69,15 +70,25 @@ export function HomePage({ user, onLogout, onViewMyEvents, onViewEventDetail }: 
     loadEvents();
   }, []);
 
+  const locations = useMemo(
+    () => [
+      'All Locations',
+      ...new Set(events.map((event) => event.location.split(',')[0].trim())),
+    ],
+    [events],
+  );
+
   const filteredEvents = useMemo(() => {
     const normalized = searchTerm.trim().toLowerCase();
 
     const matchesCategory = (event: Event) => {
       if (selectedCategories.all) return true;
-      const text = `${event.title} ${event.description}`.toLowerCase();
-      if (text.includes('workshop') && selectedCategories.workshop) return true;
-      if (text.includes('seminar') && selectedCategories.seminar) return true;
-      if (text.includes('competition') && selectedCategories.competition) return true;
+      const category = withEventExtras(event).category.toLowerCase();
+
+      if (category === 'workshop') return selectedCategories.workshop;
+      if (category === 'seminar') return selectedCategories.seminar;
+      if (category === 'competition') return selectedCategories.competition;
+
       return false;
     };
 
@@ -99,7 +110,8 @@ export function HomePage({ user, onLogout, onViewMyEvents, onViewEventDetail }: 
 
         if (!matchesCategory(event)) return false;
         if (!matchesDate(event)) return false;
-        if (location !== 'All Locations' && event.location !== location) return false;
+        const eventLocation = event.location.split(',')[0].trim();
+        if (location !== 'All Locations' && eventLocation !== location) return false;
 
         return true;
       })
@@ -256,10 +268,11 @@ export function HomePage({ user, onLogout, onViewMyEvents, onViewEventDetail }: 
                       onChange={(e) => setLocation(e.target.value)}
                       className="w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     >
-                      <option>All Locations</option>
-                      <option>Binus Anggrek</option>
-                      <option>Binus Alam Sutera</option>
-                      <option>Online (Zoom)</option>
+                      {locations.map((locationOption) => (
+                        <option key={locationOption} value={locationOption}>
+                          {locationOption}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>

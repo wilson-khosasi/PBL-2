@@ -41,6 +41,42 @@ const sampleEvents = [
     capacity: 40,
     imageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=600&fit=crop',
   },
+  {
+    title: 'Backend Development Workshop with Node.js',
+    description:
+      'Build a REST API with Node.js, Express, PostgreSQL, and Prisma in this practical backend development workshop.',
+    date: daysFromNow(35),
+    location: 'Binus Anggrek, Lab C',
+    capacity: 35,
+    imageUrl: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=800&h=600&fit=crop',
+  },
+  {
+    title: 'Cloud Computing and DevOps Seminar',
+    description:
+      'Learn the fundamentals of cloud platforms, containerization, and CI/CD from experienced infrastructure engineers.',
+    date: daysFromNow(42),
+    location: 'Online (Zoom)',
+    capacity: 150,
+    imageUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&h=600&fit=crop',
+  },
+  {
+    title: 'UI UX Design Sprint Workshop',
+    description:
+      'Practice problem framing, prototyping, and user testing with a guided design sprint for student product teams.',
+    date: daysFromNow(49),
+    location: 'Binus Alam Sutera, Studio 2',
+    capacity: 45,
+    imageUrl: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&h=600&fit=crop',
+  },
+  {
+    title: 'Competitive Programming Competition',
+    description:
+      'Take part in an algorithmic programming competition with beginner and intermediate problem tracks.',
+    date: daysFromNow(56),
+    location: 'Binus Anggrek, Auditorium',
+    capacity: 120,
+    imageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&h=600&fit=crop',
+  },
 ];
 
 async function main() {
