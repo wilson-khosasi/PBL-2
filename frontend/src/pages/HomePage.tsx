@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import logoImage from '../assets/logo_himti.png';
 import welcomeBanner from '../assets/welcome_banner.png';
 import categoryIcon from '../assets/categori_icon.png';
@@ -31,6 +31,10 @@ export function HomePage({ user, onLogout, onViewMyEvents, onViewEventDetail }: 
   });
   const [dateFilter, setDateFilter] = useState<'all' | 'week' | 'month'>('all');
   const [location, setLocation] = useState('All Locations');
+  const eventsSectionRef = useRef<HTMLDivElement>(null);
+
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+  const scrollToEvents = () => eventsSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
 
   const handleCategoryToggle = (key: keyof typeof selectedCategories) => {
     setSelectedCategories((prev) => {
@@ -136,26 +140,21 @@ export function HomePage({ user, onLogout, onViewMyEvents, onViewEventDetail }: 
           </div>
 
           <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600">
-            <button type="button" className="rounded-full px-4 py-2 font-semibold text-slate-700 transition hover:bg-slate-100">
+            <button type="button" onClick={scrollToTop} className="rounded-full px-4 py-2 font-semibold text-blue-700 transition hover:bg-blue-100">
               Home
             </button>
-            <button type="button" className="rounded-full px-4 py-2 font-semibold text-slate-700 transition hover:bg-slate-100">
+            <button type="button" onClick={scrollToEvents} className="rounded-full px-4 py-2 font-semibold text-slate-700 transition hover:bg-slate-100">
               Events
-            </button>
-            <button type="button" className="rounded-full px-4 py-2 font-semibold text-slate-700 transition hover:bg-slate-100">
-              Tickets
-            </button>
-            <button type="button" className="rounded-full px-4 py-2 font-semibold text-slate-700 transition hover:bg-slate-100">
-              About
             </button>
             <button
               type="button"
               onClick={onViewMyEvents}
-              className="rounded-full px-4 py-2 font-semibold text-slate-700 transition hover:bg-slate-100"
+              className="rounded-full px-4 py-2 font-semibold text-slate-700 transition hover:bg-slate-50"
             >
               My Events
             </button>
             <div className="ml-3 rounded-full border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-800">
+              <span className="text-lg">👤</span>
               {user.fullName}
             </div>
             <button
@@ -191,7 +190,7 @@ export function HomePage({ user, onLogout, onViewMyEvents, onViewEventDetail }: 
             <p className="text-slate-500">Loading events...</p>
           </div>
         ) : (
-          <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
+          <div ref={eventsSectionRef} className="grid gap-6 lg:grid-cols-[300px_1fr]">
             <aside className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <div className="mb-8">
                 <h2 className="text-lg font-semibold text-slate-900">Filters</h2>

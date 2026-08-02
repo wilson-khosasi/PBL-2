@@ -11,9 +11,11 @@ interface EventDetailPageProps {
   user: AuthUser;
   onBack: () => void;
   onLogout: () => void;
+  onViewMyEvents: () => void;
+  onGoHome: () => void;
 }
 
-export function EventDetailPage({ eventId, user, onBack, onLogout }: EventDetailPageProps) {
+export function EventDetailPage({ eventId, user, onBack, onLogout, onViewMyEvents, onGoHome }: EventDetailPageProps) {
   const [event, setEvent] = useState<Event | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -77,13 +79,13 @@ export function EventDetailPage({ eventId, user, onBack, onLogout }: EventDetail
           </div>
 
           <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600">
-            <button type="button" onClick={onBack} className="rounded-full px-4 py-2 font-semibold text-slate-700 transition hover:bg-slate-100">
+            <button type="button" onClick={onGoHome} className="rounded-full px-4 py-2 font-semibold text-slate-700 transition hover:bg-slate-100">
               Home
             </button>
-            <button type="button" onClick={onBack} className="rounded-full px-4 py-2 font-semibold text-slate-700 transition hover:bg-slate-100">
+            <button type="button" onClick={onGoHome} className="rounded-full px-4 py-2 font-semibold text-slate-700 transition hover:bg-slate-100">
               Events
             </button>
-            <button type="button" className="rounded-full px-4 py-2 font-semibold text-blue-700 transition hover:bg-blue-50">
+            <button type="button" onClick={onViewMyEvents} className="rounded-full px-4 py-2 font-semibold text-blue-700 transition hover:bg-blue-50">
               My Events
             </button>
             <div className="ml-3 flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-800">

@@ -3,10 +3,11 @@ import type { Registration } from '../types/registration';
 interface RegistrationCardProps {
   registration: Registration;
   onCancel: (registrationId: string) => void;
+  onViewDetails: (eventId: string) => void;
   isCancelling?: boolean;
 }
 
-export function RegistrationCard({ registration, onCancel, isCancelling }: RegistrationCardProps) {
+export function RegistrationCard({ registration, onCancel, onViewDetails, isCancelling }: RegistrationCardProps) {
   const { event } = registration;
 
   const formattedDate = new Date(event.date).toLocaleDateString('id-ID', {
@@ -42,7 +43,10 @@ export function RegistrationCard({ registration, onCancel, isCancelling }: Regis
       </div>
 
       <div className="flex gap-2">
-        <button className="bg-blue-700 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-800">
+        <button
+          onClick={() => onViewDetails(registration.eventId)}
+          className="bg-blue-700 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-blue-800"
+        >
           See Details
         </button>
         <button

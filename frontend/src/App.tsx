@@ -10,6 +10,7 @@ function App() {
   const { user, isRestoringSession, logout } = useAuth();
   const [activePage, setActivePage] = useState<'home' | 'my-events' | 'event-detail'>('home');
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [previousPage, setPreviousPage] = useState<'home' | 'my-events'>('home');
 
   if (isRestoringSession) {
     return (
@@ -21,7 +22,16 @@ function App() {
 
   if (user) {
     if (activePage === 'my-events') {
-      return <MyEventsPage onBack={() => setActivePage('home')} />;
+      return (
+        <MyEventsPage
+          onBack={() => setActivePage('home')}
+          onViewEventDetail={(eventId) => {
+            setSelectedEventId(eventId);
+            setPreviousPage('my-events');
+            setActivePage('event-detail');
+          }}
+        />
+      );
     }
 
     if (activePage === 'event-detail' && selectedEventId) {
@@ -30,10 +40,18 @@ function App() {
           eventId={selectedEventId}
           user={user}
           onBack={() => {
-            setActivePage('home');
+            setActivePage(previousPage);
             setSelectedEventId(null);
           }}
           onLogout={logout}
+          onViewMyEvents={() => {
+            setSelectedEventId(null);
+            setActivePage('my-events');
+          }}
+          onGoHome={() => {
+            setSelectedEventId(null);
+            setActivePage('home');
+          }}
         />
       );
     }
@@ -45,6 +63,7 @@ function App() {
         onViewMyEvents={() => setActivePage('my-events')}
         onViewEventDetail={(eventId) => {
           setSelectedEventId(eventId);
+          setPreviousPage('home');
           setActivePage('event-detail');
         }}
       />
